@@ -130,6 +130,33 @@ test_phosh_util_calculate_supported_mode_scales_fractional (void)
 }
 
 
+static void
+test_phosh_util_fractional_preserves_integer_scales (void)
+{
+  g_autofree float *integer_scales = NULL;
+  g_autofree float *fractional_scales = NULL;
+  int n_integer, n_fractional;
+
+  /* 3x works even though the width is not divisible by three. */
+  integer_scales = phosh_util_calculate_supported_mode_scales (1220, 2712,
+                                                               &n_integer, FALSE);
+  fractional_scales = phosh_util_calculate_supported_mode_scales (1220, 2712,
+                                                                  &n_fractional, TRUE);
+
+  for (int i = 0; i < n_integer; i++) {
+    gboolean found = FALSE;
+
+    for (int j = 0; j < n_fractional; j++) {
+      if (G_APPROX_VALUE (integer_scales[i], fractional_scales[j], FLT_EPSILON)) {
+        found = TRUE;
+        break;
+      }
+    }
+    g_assert_true (found);
+  }
+}
+
+
 int
 main (int argc, char *argv[])
 {
@@ -141,6 +168,8 @@ main (int argc, char *argv[])
                    test_phosh_util_calculate_supported_mode_scales_integer);
   g_test_add_func ("/phosh/util/scale/fractional",
                    test_phosh_util_calculate_supported_mode_scales_fractional);
+  g_test_add_func ("/phosh/util/scale/fractional-preserves-integer",
+                   test_phosh_util_fractional_preserves_integer_scales);
 
   return g_test_run ();
 }

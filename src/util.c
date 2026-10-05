@@ -1089,9 +1089,13 @@ phosh_util_calculate_supported_mode_scales (guint32   width,
         float scale;
         float scale_value = i + j * SCALE_FACTORS_STEPS;
 
-        scale = get_closest_scale_factor_for_resolution (width, height,
-                                                         scale_value,
-                                                         max_bound);
+        /* Integer scales also work when the resolution is not divisible. */
+        if (j == 0 && is_valid_scale (width, height, scale_value))
+          scale = scale_value;
+        else
+          scale = get_closest_scale_factor_for_resolution (width, height,
+                                                           scale_value,
+                                                           max_bound);
         if (scale > 0.0)
           g_array_append_val (supported_scales, scale);
       }
